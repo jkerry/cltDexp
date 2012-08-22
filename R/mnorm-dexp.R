@@ -128,39 +128,49 @@ OlmanPValue <- function(readCounts, libraryTotals, concentrationLimit=0.0, pVari
 
 
 
-mnorm_dexp <- function(x, ...) UseMethod("mnorm_dexp",x)
-setGeneric("mnorm_dexp",function( object, ...) {
-	standardGeneric("mnorm_dexp")
+
+setGeneric("cltDexp",function( object, ...) {
+	standardGeneric("cltDexp")
 })
 
-setMethod("mnorm_dexp", signature(object="matrix"), function(object, ... ){
+setMethod("cltDexp", signature(object="matrix"), function(object, abundanceLimit=0.0, varianceLimit=0.0, ... ){
 
-message("matrixFound")
-
-} )
-
-setMethod("mnorm_dexp", signature(object="vector"), function(object, treatmentTotals, ... ){ 
- 
-message("vectorFound")
-if(missing(treatmentTotals)) stop("treatmentTotals not defined: must be a numeric vector")
- 
-} )
-
-Tmnorm_dexp.default <- function(x, transcriptNames,treatmentTotals, abundanceLimit=0.0, varianceLimit=0.0,...){
-	#is x a numeric matrix?
-	data.x <- as.matrix(x)
-	if(!is.numeric(data.x))stop("Invalid Input: x must be a numeric matrix with columns representing treatments and rows representing transcripts. Entries are transcript ambundance estimates.")
-	data.nlibs <- length(x[1,])
-	data.ntranscripts <- length(x[,1])
-	
-	if(missing(transcriptNames))	data.transcriptNames <- rownames(x)
-	else				data.transcriptNames <- transcriptNames
-	if(missing(treatmentTotals))	data.treatmentTotals <- colSums(x)
-	else				data.treatmenttotals <- treatmentTotals
+	message("matrixFound")
+	data.nlibs <- length(object[1,])
+	data.ntranscripts <- length(object[,1])
+	data.totals <- colSums(object)
+	print(data.totals)
+	#pvals <- apply(object,1,OlmanPValue,libraryTotals=data.totals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit)
 	pvals <- vector(mode="numeric",length=data.ntranscripts);
-	#libraryTotals, concentrationLimit=0.0, pVarianceLimit=0.0
-	pvals <- apply(x,1,OlmanPValue,libraryTotals=data.treatmentTotals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit)		
-
+	for(i in 1:data.ntranscripts){
+		pvals[i] <- OlmanPValue(object[i,],libraryTotals=data.totals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit) 
+	}
 	return(pvals)
+})
+
+setMethod("cltDexp", signature(object="vector"), function(object, treatmentTotals, abundanceLimit=0.0, varianceLimit=0.0,... ){ 
+ 
+	message("vectorFound")
+	if(missing(treatmentTotals)) stop("treatmentTotals not defined: must be a numeric vector")
+	return(OlmanPValue(object,libraryTotals=treatmentTotals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit) )
+ 
+} )
+
+#Tmnorm_dexp.default <- function(x, transcriptNames,treatmentTotals, abundanceLimit=0.0, varianceLimit=0.0,...){
+	#is x a numeric matrix?
+#	data.x <- as.matrix(x)
+#	if(!is.numeric(data.x))stop("Invalid Input: x must be a numeric matrix with columns representing treatments and rows representing transcripts. Entries are transcript ambundance estimates.")
+#	data.nlibs <- length(x[1,])
+#	data.ntranscripts <- length(x[,1])
 	
-}
+#	if(missing(transcriptNames))	data.transcriptNames <- rownames(x)
+#	else				data.transcriptNames <- transcriptNames
+#	if(missing(treatmentTotals))	data.treatmentTotals <- colSums(x)
+#	else				data.treatmenttotals <- treatmentTotals
+#	pvals <- vector(mode="numeric",length=data.ntranscripts);
+	#libraryTotals, concentrationLimit=0.0, pVarianceLimit=0.0
+#	pvals <- apply(x,1,OlmanPValue,libraryTotals=data.treatmentTotals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit)		
+
+#	return(pvals)
+	
+#}
