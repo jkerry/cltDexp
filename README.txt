@@ -1,5 +1,5 @@
 #####################################################################
-#	cltDexp	-An R package for the analysis of differential	    #
+#	cltDexp	-A R package for the analysis of differential	    #
 #		 expression in experimental data with many	    #
 #		 pooled biological replicates.			    #
 #####################################################################
