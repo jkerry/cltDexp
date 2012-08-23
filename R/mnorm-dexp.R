@@ -44,7 +44,7 @@ m <- dim/2
         mult <- Rad
         #print("ERF::Rad/SQRT2 is: ")
         #print(erf(Rad/SQRT2))
-        temp <- erf(Rad/SQRT2)/SQRT2DIVPI
+        temp <- .erf(Rad/SQRT2)/SQRT2DIVPI
         #print("Temp is: ")
         #print(temp)
         prom <- temp
@@ -127,7 +127,7 @@ OlmanPValue <- function(readCounts, libraryTotals, concentrationLimit=0.0, pVari
 }
 
 
-
+.erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
 
 setGeneric("cltDexp",function( object, ...) {
 	standardGeneric("cltDexp")
@@ -135,16 +135,10 @@ setGeneric("cltDexp",function( object, ...) {
 
 setMethod("cltDexp", signature(object="matrix"), function(object, abundanceLimit=0.0, varianceLimit=0.0, ... ){
 
-	message("matrixFound")
-	data.nlibs <- length(object[1,])
-	data.ntranscripts <- length(object[,1])
 	data.totals <- colSums(object)
-	print(data.totals)
-	#pvals <- apply(object,1,OlmanPValue,libraryTotals=data.totals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit)
-	pvals <- vector(mode="numeric",length=data.ntranscripts);
-	for(i in 1:data.ntranscripts){
-		pvals[i] <- OlmanPValue(object[i,],libraryTotals=data.totals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit) 
-	}
+	
+	pvals <- apply(object,1,OlmanPValue,libraryTotals=data.totals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit)
+	
 	return(pvals)
 })
 
@@ -156,21 +150,3 @@ setMethod("cltDexp", signature(object="vector"), function(object, treatmentTotal
  
 } )
 
-#Tmnorm_dexp.default <- function(x, transcriptNames,treatmentTotals, abundanceLimit=0.0, varianceLimit=0.0,...){
-	#is x a numeric matrix?
-#	data.x <- as.matrix(x)
-#	if(!is.numeric(data.x))stop("Invalid Input: x must be a numeric matrix with columns representing treatments and rows representing transcripts. Entries are transcript ambundance estimates.")
-#	data.nlibs <- length(x[1,])
-#	data.ntranscripts <- length(x[,1])
-	
-#	if(missing(transcriptNames))	data.transcriptNames <- rownames(x)
-#	else				data.transcriptNames <- transcriptNames
-#	if(missing(treatmentTotals))	data.treatmentTotals <- colSums(x)
-#	else				data.treatmenttotals <- treatmentTotals
-#	pvals <- vector(mode="numeric",length=data.ntranscripts);
-	#libraryTotals, concentrationLimit=0.0, pVarianceLimit=0.0
-#	pvals <- apply(x,1,OlmanPValue,libraryTotals=data.treatmentTotals,concentrationLimit=abundanceLimit,pVarianceLimit=varianceLimit)		
-
-#	return(pvals)
-	
-#}
